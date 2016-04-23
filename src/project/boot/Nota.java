@@ -5,16 +5,18 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Nota implements Serializable{
 	private String note_txt;
 	private String note_title;
-	private String data; 
+	//private String data; 
+	private Date data; 
 	
-	Nota (String texto, String titulo, String data ){
+	Nota (String texto, String titulo, Date time ){
 		note_txt = texto;
 		note_title = titulo;
-		this.data = data;
+		data = time;
 	}
 	String getText(){
 		return note_txt;
@@ -25,5 +27,10 @@ public class Nota implements Serializable{
 	void setText(String text){
 		note_txt = text;
 	}
-	
+	Date getData(){
+		return data;
+	}
+	void setData(Date aux){
+		data = aux;
+	}	
 }

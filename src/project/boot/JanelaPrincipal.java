@@ -4,6 +4,9 @@ import java.awt.EventQueue;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.DefaultListModel;
@@ -23,26 +26,26 @@ import javax.swing.JLabel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class JanelaPrincipal {
+public class JanelaPrincipal{
 
 	private JFrame frame;
 	private ArrayList <Nota> blocoNotas = new ArrayList <Nota> ();
 	private ArrayList <String> titulos = new ArrayList <String> ();
-	//private int NumNotes = 0;
 	private JTextField textFieldTitulo;
 	private JTextArea textAreaNota;
 	private Calendar cal;
 	private JScrollPane scrollPane; 
-	//private int numNotes = 0;
 	private JList list;
 	private JLabel lblOrdenarPor;
 	private JButton btnApagar;
 	DefaultListModel dm = new DefaultListModel();
 	private JButton btnAbrir;
+	private JComboBox comboBox;
 	
 	/**
 	 * Create the application.
 	 */
+	
 	
 	public JanelaPrincipal() {
 		carregarArquivos();
@@ -93,20 +96,20 @@ public class JanelaPrincipal {
 		btnSalvarNota.setFont(new Font("Arial Narrow", Font.BOLD, 13));
 		btnSalvarNota.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				cal = Calendar.getInstance();
-				SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss");
-				Nota novaNota = new Nota(textAreaNota.getText(),textFieldTitulo.getText(), sdf.format(cal.getTime()));
-				blocoNotas.add(novaNota);
+				comboBox.setSelectedIndex(0);
+				Date date = new Date();
+				Nota novaNota = new Nota(textAreaNota.getText(),textFieldTitulo.getText(), date);
 				if(titulos.contains(textFieldTitulo.getText())==true){
-					System.out.println("entrou");
 					for(Nota aux: blocoNotas){
 						if(aux.getTitle().equals(textFieldTitulo.getText())==true){
 							aux.setText(textAreaNota.getText());
+							aux.setData(date);
 							break;
 						}				
 					}	
 				}
 				else{
+					blocoNotas.add(novaNota);
 					titulos.add(textFieldTitulo.getText());
 					atualizarLista(textFieldTitulo.getText());
 				}							
@@ -129,7 +132,7 @@ public class JanelaPrincipal {
 		lblTtulo.setBounds(245, 36, 35, 23);
 		frame.getContentPane().add(lblTtulo);
 		
-		lblOrdenarPor = new JLabel("Ordenar por:");
+		lblOrdenarPor = new JLabel("Exibir por:");
 		lblOrdenarPor.setFont(new Font("Arial Narrow", Font.PLAIN, 13));
 		lblOrdenarPor.setBounds(28, 45, 82, 23);
 		frame.getContentPane().add(lblOrdenarPor);
@@ -139,7 +142,7 @@ public class JanelaPrincipal {
 			public void actionPerformed(ActionEvent e) {
 				int index = titulos.indexOf(list.getSelectedValue().toString());
 				for(Nota aux: blocoNotas){
-					if(aux.getTitle()==titulos.get(index)){
+					if(aux.getTitle().equals(titulos.get(index))==true){
 						blocoNotas.remove(aux);
 						break;
 					}
@@ -173,6 +176,38 @@ public class JanelaPrincipal {
 		btnAbrir.setFont(new Font("Arial Narrow", Font.BOLD, 13));
 		btnAbrir.setBounds(124, 285, 69, 23);
 		frame.getContentPane().add(btnAbrir);
+		
+		comboBox = new JComboBox();
+		comboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(comboBox.getSelectedIndex()==1){
+					Collections.sort(titulos);
+					dm.clear();
+					list.setModel(dm);
+					for (String name : titulos){
+						atualizarLista(name);
+					}
+				}
+				if(comboBox.getSelectedIndex()==2){
+					Collections.sort(blocoNotas, new Comparator<Nota>() {
+					    public int compare(Nota m1, Nota m2) {
+					        return m1.getData().compareTo(m2.getData());
+					    }
+					});
+					dm.clear();
+					list.setModel(dm);
+					for (Nota N : blocoNotas){
+						atualizarLista(N.getTitle());
+					}
+				}
+			}
+		});
+		comboBox.setBounds(85, 47, 108, 20);
+		frame.getContentPane().add(comboBox);
+		comboBox.addItem("");
+		comboBox.addItem("Nome");
+		comboBox.addItem("Data");
+		//comboBox.addItem("Meta-tag");
 	}
 	
 	void atualizarLista(String arg){	
@@ -245,7 +280,6 @@ public class JanelaPrincipal {
 	    	//e.printStackTrace( );
 	    }
 	}
-	
 	
 	/**
 	 * Launch the application.
