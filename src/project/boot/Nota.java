@@ -10,13 +10,14 @@ import java.util.Date;
 public class Nota implements Serializable{
 	private String note_txt;
 	private String note_title;
-	//private String data; 
+	private String tag; 
 	private Date data; 
 	
-	Nota (String texto, String titulo, Date time ){
+	Nota (String texto, String titulo, Date time, String metatag){
 		note_txt = texto;
 		note_title = titulo;
 		data = time;
+		tag = metatag;
 	}
 	String getText(){
 		return note_txt;
@@ -33,4 +34,10 @@ public class Nota implements Serializable{
 	void setData(Date aux){
 		data = aux;
 	}	
+	String getTag(){
+		return tag;
+	}
+	void setTag(String aux){
+		tag = aux;
+	}
 }

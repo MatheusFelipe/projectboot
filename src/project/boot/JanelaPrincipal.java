@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import javax.swing.JFrame;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -31,6 +32,7 @@ public class JanelaPrincipal{
 	private JFrame frame;
 	private ArrayList <Nota> blocoNotas = new ArrayList <Nota> ();
 	private ArrayList <String> titulos = new ArrayList <String> ();
+	private ArrayList <String> tags = new ArrayList <String> ();
 	private JTextField textFieldTitulo;
 	private JTextArea textAreaNota;
 	private Calendar cal;
@@ -39,8 +41,12 @@ public class JanelaPrincipal{
 	private JLabel lblOrdenarPor;
 	private JButton btnApagar;
 	DefaultListModel dm = new DefaultListModel();
+	DefaultComboBoxModel cb_tag = new DefaultComboBoxModel();
 	private JButton btnAbrir;
 	private JComboBox comboBox;
+	private JComboBox comboBoxTag;
+	private JTextField textFieldTag;
+	private JLabel lblVincularTag;
 	
 	/**
 	 * Create the application.
@@ -51,7 +57,7 @@ public class JanelaPrincipal{
 		carregarArquivos();
 		//Criar e configurar JFrame
 		frame = new JFrame();
-		frame.setBounds(100, 100, 534, 405);
+		frame.setBounds(100, 100, 531, 379);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -68,10 +74,40 @@ public class JanelaPrincipal{
 			}
 		});
 		scrollPane.setViewportView(list);
+		
+		JLabel lblNotasSalvas = new JLabel("Notas Salvas");
+		scrollPane.setColumnHeaderView(lblNotasSalvas);
+		lblNotasSalvas.setFont(new Font("Arial Narrow", Font.BOLD, 14));
 		list.setVisible(true);
 		
 		for (String name : titulos){
 			atualizarLista(name);
+		}
+		
+		comboBoxTag = new JComboBox();
+		comboBoxTag.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int index = comboBoxTag.getSelectedIndex();
+				if(index!=0){
+					dm.clear();
+					for(Nota aux: blocoNotas){
+						if(aux.getTag().equals(comboBoxTag.getItemAt(index))==true){
+							atualizarLista(aux.getTitle());
+						}	
+					}
+				}
+				else{
+					dm.clear();
+					for (String name : titulos){
+						atualizarLista(name);
+					}
+					
+				}
+			}
+		});		
+		atualizarTags("");
+		for (String name : tags){
+			atualizarTags(name);
 		}
 		
 		initialize();
@@ -97,12 +133,16 @@ public class JanelaPrincipal{
 		btnSalvarNota.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				comboBox.setSelectedIndex(0);
+				comboBoxTag.setSelectedIndex(0);
 				Date date = new Date();
-				Nota novaNota = new Nota(textAreaNota.getText(),textFieldTitulo.getText(), date);
+				Nota novaNota = new Nota(textAreaNota.getText(),textFieldTitulo.getText(), date, textFieldTag.getText());
 				if(titulos.contains(textFieldTitulo.getText())==true){
 					for(Nota aux: blocoNotas){
 						if(aux.getTitle().equals(textFieldTitulo.getText())==true){
 							aux.setText(textAreaNota.getText());
+							if(aux.getTag().equals(textFieldTag.getText())==false){
+								aux.setTag(textFieldTag.getText());
+							}
 							aux.setData(date);
 							break;
 						}				
@@ -111,21 +151,24 @@ public class JanelaPrincipal{
 				else{
 					blocoNotas.add(novaNota);
 					titulos.add(textFieldTitulo.getText());
-					atualizarLista(textFieldTitulo.getText());
-				}							
+					if(tags.indexOf(textFieldTag.getText())<0){
+						tags.add(textFieldTag.getText());
+					}
+					atualizarLista(textFieldTitulo.getText());	
+				}
+				if(cb_tag.getIndexOf(textFieldTag.getText())<0){
+					atualizarTags(textFieldTag.getText());	
+				}
 				textAreaNota.setText("");
 				textFieldTitulo.setText("");
+				textFieldTag.setText("");
 				criarSaida();
-				criarSaidaTitulos();	
+				criarSaidaTitulos();
+				criarSaidaTags();
 			}
 		});
-		btnSalvarNota.setBounds(221, 285, 113, 23);
+		btnSalvarNota.setBounds(392, 312, 113, 23);
 		frame.getContentPane().add(btnSalvarNota);
-		
-		JLabel lblNotasSalvas = new JLabel("Notas Salvas:");
-		lblNotasSalvas.setFont(new Font("Arial Narrow", Font.BOLD, 14));
-		lblNotasSalvas.setBounds(28, 22, 82, 23);
-		frame.getContentPane().add(lblNotasSalvas);
 		
 		JLabel lblTtulo = new JLabel("T\u00EDtulo:");
 		lblTtulo.setFont(new Font("Arial Narrow", Font.BOLD, 14));
@@ -134,7 +177,7 @@ public class JanelaPrincipal{
 		
 		lblOrdenarPor = new JLabel("Exibir por:");
 		lblOrdenarPor.setFont(new Font("Arial Narrow", Font.PLAIN, 13));
-		lblOrdenarPor.setBounds(28, 45, 82, 23);
+		lblOrdenarPor.setBounds(28, 11, 56, 23);
 		frame.getContentPane().add(lblOrdenarPor);
 		
 		btnApagar = new JButton("Apagar");
@@ -167,6 +210,7 @@ public class JanelaPrincipal{
 				for(Nota aux: blocoNotas){
 					if(aux.getTitle().equals(list.getSelectedValue().toString())==true){
 						textAreaNota.setText(aux.getText());
+						textFieldTag.setText(aux.getTag());
 						break;
 					}				
 				}
@@ -202,17 +246,40 @@ public class JanelaPrincipal{
 				}
 			}
 		});
-		comboBox.setBounds(85, 47, 108, 20);
+		comboBox.setBounds(79, 13, 108, 20);
 		frame.getContentPane().add(comboBox);
 		comboBox.addItem("");
 		comboBox.addItem("Nome");
 		comboBox.addItem("Data");
+		
+		JLabel lblTags = new JLabel("Tags:");
+		lblTags.setFont(new Font("Arial Narrow", Font.PLAIN, 13));
+		lblTags.setBounds(48, 34, 31, 23);
+		frame.getContentPane().add(lblTags);
+		
+		
+		comboBoxTag.setBounds(79, 39, 108, 20);
+		frame.getContentPane().add(comboBoxTag);
+		
+		textFieldTag = new JTextField();
+		textFieldTag.setColumns(10);
+		textFieldTag.setBounds(332, 285, 173, 23);
+		frame.getContentPane().add(textFieldTag);
+		
+		lblVincularTag = new JLabel("Vincular tag:");
+		lblVincularTag.setFont(new Font("Arial Narrow", Font.PLAIN, 13));
+		lblVincularTag.setBounds(266, 285, 69, 26);
+		frame.getContentPane().add(lblVincularTag);
 		//comboBox.addItem("Meta-tag");
 	}
 	
 	void atualizarLista(String arg){	
 		list.setModel(dm);
 		dm.addElement(arg);
+	}
+	void atualizarTags(String arg){
+		comboBoxTag.setModel(cb_tag);
+		cb_tag.addElement(arg);
 	}
 	
 	void criarSaidaTitulos(){
@@ -223,6 +290,23 @@ public class JanelaPrincipal{
 		    	ObjectOutputStream objGravar = new ObjectOutputStream(arquivoGrav);
 		    	//Grava o objeto cliente no arquivo
 		    	objGravar.writeObject(titulos);
+		    	//objGravar.flush();
+		    	objGravar.close();
+		    	//arquivoGrav.flush();
+		    	arquivoGrav.close();
+		    	//System.out.println("Objeto gravado com sucesso!");
+		    }catch( Exception e ){
+		    	e.printStackTrace( );
+		    }
+	}
+	void criarSaidaTags(){
+		 try{
+		    	//Gera o arquivo para armazenar o objeto
+		    	FileOutputStream arquivoGrav = new FileOutputStream("saidatags.dat");
+		    	//Classe responsavel por inserir os objetos
+		    	ObjectOutputStream objGravar = new ObjectOutputStream(arquivoGrav);
+		    	//Grava o objeto cliente no arquivo
+		    	objGravar.writeObject(tags);
 		    	//objGravar.flush();
 		    	objGravar.close();
 		    	//arquivoGrav.flush();
@@ -250,6 +334,21 @@ public class JanelaPrincipal{
 		    }
 	}
 	void carregarArquivos(){
+		try{
+	    	//Carrega o arquivo
+	    	FileInputStream arquivoLeitura = new FileInputStream("saidatags.dat");
+	    	//Classe responsavel por recuperar os objetos do arquivo
+	    	ObjectInputStream objLeitura = new ObjectInputStream(arquivoLeitura);
+	    	
+	    	tags = (ArrayList)objLeitura.readObject();
+	    	//System.out.println(obj_recuperado.getNome());
+	    	objLeitura.close();
+	    	arquivoLeitura.close();
+	    	//atualizarLista(titulos);
+	    }catch( Exception e ){
+	    	tags = new ArrayList <String> ();
+	    	//e.printStackTrace( );
+	    }
 		try{
 	    	//Carrega o arquivo
 	    	FileInputStream arquivoLeitura = new FileInputStream("saidatitulos.dat");
