@@ -12,12 +12,14 @@ public class Nota implements Serializable{
 	private String note_title;
 	private String tag; 
 	private Date data; 
+	private String link;
 	
-	Nota (String texto, String titulo, Date time, String metatag){
+	Nota (String texto, String titulo, Date time, String metatag, String hyperlink){
 		note_txt = texto;
 		note_title = titulo;
 		data = time;
 		tag = metatag;
+		link = hyperlink;
 	}
 	String getText(){
 		return note_txt;
@@ -39,5 +41,11 @@ public class Nota implements Serializable{
 	}
 	void setTag(String aux){
 		tag = aux;
+	}
+	String getLink(){
+		return link;
+	}
+	void setLink(String aux){
+		link = aux;
 	}
 }

@@ -1,6 +1,5 @@
 package project.boot;
 
-import java.awt.EventQueue;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -14,6 +13,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -47,6 +48,9 @@ public class JanelaPrincipal{
 	private JComboBox comboBoxTag;
 	private JTextField textFieldTag;
 	private JLabel lblVincularTag;
+	private JLabel lblHyperlink;
+	private JTextField textFieldLink;
+	private JButton btnGo;
 	
 	/**
 	 * Create the application.
@@ -124,7 +128,7 @@ public class JanelaPrincipal{
 		textFieldTitulo.setColumns(10);
 		
 		textAreaNota = new JTextArea();
-		textAreaNota.setBounds(221, 68, 287, 206);
+		textAreaNota.setBounds(221, 68, 287, 181);
 		frame.getContentPane().add(textAreaNota);
 		
 		JButton btnSalvarNota = new JButton("Salvar Nota");
@@ -135,13 +139,16 @@ public class JanelaPrincipal{
 				comboBox.setSelectedIndex(0);
 				comboBoxTag.setSelectedIndex(0);
 				Date date = new Date();
-				Nota novaNota = new Nota(textAreaNota.getText(),textFieldTitulo.getText(), date, textFieldTag.getText());
+				Nota novaNota = new Nota(textAreaNota.getText(),textFieldTitulo.getText(), date, textFieldTag.getText(), textFieldLink.getText());
 				if(titulos.contains(textFieldTitulo.getText())==true){
 					for(Nota aux: blocoNotas){
 						if(aux.getTitle().equals(textFieldTitulo.getText())==true){
 							aux.setText(textAreaNota.getText());
 							if(aux.getTag().equals(textFieldTag.getText())==false){
 								aux.setTag(textFieldTag.getText());
+							}
+							if(aux.getLink().equals(textFieldLink.getText())==false){
+								aux.setLink(textFieldLink.getText());
 							}
 							aux.setData(date);
 							break;
@@ -162,6 +169,7 @@ public class JanelaPrincipal{
 				textAreaNota.setText("");
 				textFieldTitulo.setText("");
 				textFieldTag.setText("");
+				textFieldLink.setText("");
 				criarSaida();
 				criarSaidaTitulos();
 				criarSaidaTags();
@@ -211,6 +219,8 @@ public class JanelaPrincipal{
 					if(aux.getTitle().equals(list.getSelectedValue().toString())==true){
 						textAreaNota.setText(aux.getText());
 						textFieldTag.setText(aux.getTag());
+						textFieldLink.setText(aux.getLink());
+						
 						break;
 					}				
 				}
@@ -270,6 +280,44 @@ public class JanelaPrincipal{
 		lblVincularTag.setFont(new Font("Arial Narrow", Font.PLAIN, 13));
 		lblVincularTag.setBounds(266, 285, 69, 26);
 		frame.getContentPane().add(lblVincularTag);
+		
+		lblHyperlink = new JLabel("hyperlink:");
+		lblHyperlink.setFont(new Font("Arial Narrow", Font.PLAIN, 13));
+		lblHyperlink.setBounds(231, 260, 69, 26);
+		frame.getContentPane().add(lblHyperlink);
+		
+		textFieldLink = new JTextField();
+		textFieldLink.setColumns(10);
+		textFieldLink.setBounds(278, 260, 165, 23);
+		frame.getContentPane().add(textFieldLink);
+		
+		btnGo = new JButton("Go");
+		btnGo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String url = textFieldLink.getText();
+		        if(Desktop.isDesktopSupported()){
+		            Desktop desktop = Desktop.getDesktop();
+		            try {
+		                desktop.browse(new URI(url));
+		            } catch (IOException | URISyntaxException e) {
+		                // TODO Auto-generated catch block
+		                e.printStackTrace();
+		            }
+		        }else{
+		            Runtime runtime = Runtime.getRuntime();
+		            try {
+		                runtime.exec("xdg-open " + url);
+		            } catch (IOException e) {
+		                // TODO Auto-generated catch block
+		                e.printStackTrace();
+		            }
+		        }
+			}
+		});
+		btnGo.setForeground(Color.BLACK);
+		btnGo.setFont(new Font("Arial Narrow", Font.BOLD, 13));
+		btnGo.setBounds(449, 257, 56, 26);
+		frame.getContentPane().add(btnGo);
 		//comboBox.addItem("Meta-tag");
 	}
 	
